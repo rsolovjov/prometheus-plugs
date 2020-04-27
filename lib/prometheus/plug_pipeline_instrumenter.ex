@@ -130,6 +130,20 @@ defmodule Prometheus.PlugPipelineInstrumenter do
           buckets: unquote(request_duration_buckets),
           registry: unquote(registry)
         )
+
+        Counter.declare(
+          name: :http_requests_size,
+          help: "Total size in bytes of HTTP requests made.",
+          labels: unquote(nlabels),
+          registry: unquote(registry)
+        )
+
+        Counter.declare(
+          name: :http_requests_total,
+          help: "Total size in bytes of HTTP responses made.",
+          labels: unquote(nlabels),
+          registry: unquote(registry)
+        )
       end
 
       def init(_opts) do
@@ -158,6 +172,11 @@ defmodule Prometheus.PlugPipelineInstrumenter do
             ],
             diff
           )
+
+          req_size = conn |> Utils.request_size
+          resp_size = conn |> Utils.response_size
+          :prometheus_counter.inc(unquote(registry), :http_requests_size, labels, req_size)
+          :prometheus_counter.inc(unquote(registry), :http_responses_size, labels, resp_size)
 
           conn
         end)
