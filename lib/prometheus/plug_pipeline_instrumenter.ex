@@ -139,7 +139,7 @@ defmodule Prometheus.PlugPipelineInstrumenter do
         )
 
         Counter.declare(
-          name: :http_requests_total,
+          name: :http_responses_size,
           help: "Total size in bytes of HTTP responses made.",
           labels: unquote(nlabels),
           registry: unquote(registry)
