@@ -155,6 +155,32 @@ defmodule Prometheus.PlugInstrumenter do
             end
           end
         )
+
+        unquote(
+          if counter do
+            quote do
+              Counter.declare(
+                name: :http_requests_size,
+                help:  "Total size in bytes of HTTP requests made.",
+                labels: unquote(nlabels),
+                registry: unquote(registry)
+              )
+            end
+          end
+        )
+
+        unquote(
+          if counter do
+            quote do
+              Counter.declare(
+                name: :http_responses_size,
+                help:  "Total size in bytes of HTTP responses made.",
+                labels: unquote(nlabels),
+                registry: unquote(registry)
+              )
+            end
+          end
+        )
       end
 
       def init(opts) do
@@ -204,6 +230,11 @@ defmodule Prometheus.PlugInstrumenter do
             end
           end
         )
+
+        req_size = conn |> Utils.request_size
+        resp_size = conn |> Utils.response_size
+        :prometheus_counter.inc(unquote(registry), :http_requests_size, labels, req_size)
+        :prometheus_counter.inc(unquote(registry), :http_responses_size, labels, resp_size)
 
         conn
       end
